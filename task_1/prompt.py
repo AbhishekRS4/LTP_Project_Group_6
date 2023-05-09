@@ -46,15 +46,15 @@ def labels_to_multi_choice(labels):
     return multi_choice_options
 
 def main():
-    parser = argparse.ArgumentParser(description="Data Loading and Preprocessing Script")
+    # parser = argparse.ArgumentParser(description="Data Loading and Preprocessing Script")
 
-    parser.add_argument('--data-dir', type=str, help='Path to the directory containing the dataset')
-    parser.add_argument('--export-path', type=str, help='Path to export the preprocessed data')
+    # parser.add_argument('--data-dir', type=str, help='Path to the directory containing the dataset')
+    # parser.add_argument('--export-path', type=str, help='Path to export the preprocessed data')
 
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-    data_dir = args.data_dir
-    export_path = args.export_path
+    data_dir = 'dataset'
+    export_path = 'dataset/processed'
 
     arguments_files = [
         'arguments-training.tsv',
@@ -115,7 +115,7 @@ def main():
     val_data = combined_dfs[1]
     val_data_z = combined_dfs[2]
     test_data = combined_dfs[3]
-    print(len(combined_dfs))
+
     # Convert the DataFrames to Hugging Face dataset format
     train_dataset = Dataset.from_pandas(train_data)
     val_dataset = Dataset.from_pandas(val_data)
@@ -134,7 +134,8 @@ def main():
     # export the DatasetDict object in Hugging Face dataset format
     # combined_dataset = concatenate_datasets([dataset_dict["train"], dataset_dict["validation"],dataset_dict["validation_zhihu"], dataset_dict["test"]])
 
-    dataset_dict.save_to_disk(os.path.join(export_path, 'dataset_dict'))
+    dataset_dict.save_to_disk(os.path.join(export_path, 'touche23'))
+    print(f"Dataset succesfully saved to {export_path} as touche23")
     
 if __name__ == '__main__':
     main()
