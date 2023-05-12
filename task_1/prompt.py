@@ -2,30 +2,52 @@ import os
 import argparse
 import pandas as pd
 from datasets import Dataset, concatenate_datasets, DatasetDict
+import random
+
+LABELS = ['Self-direction thought', 'Self-direction action', 'Stimulation', 'Hedonism', 'Achievement', 'Power dominance', 'Power resources', 'Face', 'Security personal', 'Security societal', 'Tradition', 'Conformity rules', 'Conformity interpersonal', 'Humility', 'Benevolence caring', 'Benevolence dependability', 'Universalism concern', 'Universalism nature', 'Universalism tolerance', 'Universalism objectivity']
+PROMPT_FORMATS = ["The premise: '{}' is '{}'. The conclusion is '{}'. Value category: {}\n Question: Which value category does the argument belong to?\n",
+                  "Premise: {}\nStance: {}\nConclusion: {}. Value category: {}\n Question: Which value category does the argument belong to?\n",
+                  "Argument: {}. {}. {}. Value category: {}\n Question: Which value category does the argument belong to?\n"]
+
 
 def convert_binary_labels_to_string(df):
     label_names = df.columns[1:]
     string_labels = []
 
-    for _, row in df.iterrows():
+    for index, row in df.iterrows():
         binary_values = row.values[1:]
         string_labels.append([label_names[i] for i, value in enumerate(binary_values) if value == 1])
 
     df['String Labels'] = string_labels
     return df
 
-def add_prompt_to_df(df):
-    prompt_format = "Premise: {}\nStance: {}\nConclusion: {}\nWhich value category does it support?"
-    preprocessed_arguments = []
+def ensemble_prompt(df):
+    prompts = [
+        [
+            prompt.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS))
+            for prompt in PROMPT_FORMATS
+        ]
+        for _, row in df.iterrows()
+    ]
 
-    for _, row in df.iterrows():
-        premise = row['Premise']
-        stance = row['Stance']
-        conclusion = row['Conclusion']
-        prompt = prompt_format.format(premise, stance, conclusion)
-        preprocessed_arguments.append(prompt)
+    df['ensemble_prompt'] = prompts
+    return df
 
-    df['Prompt'] = preprocessed_arguments
+def few_shot_prompt(df, num_shots=1, prompt_format=0, random_seed=46):
+    """Creates a few shot prompt for each argument"""
+
+    prompt_format = PROMPT_FORMATS[prompt_format]
+    
+    selected_arguments = df.sample(n=num_shots, random_state=random_seed)
+    few_shot_prompts = [
+        prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: {random.choice(LABELS)}\n"
+        for _, row in selected_arguments.iterrows()
+    ]
+    # prompts = [
+    #     df.apply(lambda row: ''.join(few_shot_prompts) + prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: \n", axis=1)
+    # ]
+
+    df['few_shot_prompt'] = df.apply(lambda row: ''.join(few_shot_prompts) + prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: \n", axis=1)
     return df
 
 def combine_columns(df_arguments, df_labels):
@@ -46,13 +68,6 @@ def labels_to_multi_choice(labels):
     return multi_choice_options
 
 def main():
-    # parser = argparse.ArgumentParser(description="Data Loading and Preprocessing Script")
-
-    # parser.add_argument('--data-dir', type=str, help='Path to the directory containing the dataset')
-    # parser.add_argument('--export-path', type=str, help='Path to export the preprocessed data')
-
-    # args = parser.parse_args()
-
     data_dir = 'dataset'
     export_path = 'dataset/processed'
 
@@ -92,7 +107,8 @@ def main():
     # Preprocess argument data
     preprocessed_arguments_dfs = []
     for df in arguments_dfs:
-        df = add_prompt_to_df(df)
+        df = ensemble_prompt(df)
+        df = few_shot_prompt(df)
         preprocessed_arguments_dfs.append(df)
 
     # Preprocess label data
@@ -110,7 +126,7 @@ def main():
         combined_df = combine_columns(argument_df, label_df)
         combined_dfs.append(combined_df)
 
-    # Split data into train, validation, and test sets
+    
     train_data = combined_dfs[0]
     val_data = combined_dfs[1]
     val_data_z = combined_dfs[2]
@@ -131,11 +147,8 @@ def main():
     dataset_dict["validation_zhihu"] = val_dataset_z
     dataset_dict["test"] = test_dataset
 
-    # export the DatasetDict object in Hugging Face dataset format
-    # combined_dataset = concatenate_datasets([dataset_dict["train"], dataset_dict["validation"],dataset_dict["validation_zhihu"], dataset_dict["test"]])
-
-    dataset_dict.save_to_disk(os.path.join(export_path, 'touche23'))
-    print(f"Dataset succesfully saved to {export_path} as touche23")
+    dataset_dict.save_to_disk(os.path.join(export_path, 'processed_dataset'))
+    print(f"Dataset succesfully saved to {export_path} as processed_dataset")
     
 if __name__ == '__main__':
     main()
