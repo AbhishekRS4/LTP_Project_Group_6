@@ -1,0 +1,74 @@
+{
+  "builder_name": "csv",
+  "citation": "",
+  "config_name": "webis--Touche23-ValueEval",
+  "dataset_size": 1818243,
+  "description": "",
+  "download_checksums": {
+    "https://huggingface.co/datasets/webis/Touche23-ValueEval/resolve/c56a063fda5467e577a5342e536473e2ff2b1dc9/data/training-00000-of-00001.tsv": {
+      "num_bytes": 1239011,
+      "checksum": "afe9789c91743eabb5255536733c15c483a8d76160d5c0d87002df00215ccd73"
+    },
+    "https://huggingface.co/datasets/webis/Touche23-ValueEval/resolve/c56a063fda5467e577a5342e536473e2ff2b1dc9/data/validationzhihu-00000-of-00001.tsv": {
+      "num_bytes": 26289,
+      "checksum": "acce1bb8022b64695ad77d1f2f8a9c8d0138a941ce22f613f068c2afe8ca574c"
+    },
+    "https://huggingface.co/datasets/webis/Touche23-ValueEval/resolve/c56a063fda5467e577a5342e536473e2ff2b1dc9/data/validation-00000-of-00001.tsv": {
+      "num_bytes": 442247,
+      "checksum": "a37fc72698de04924e2cb541c69d0d88f9914c8c65d68a21cbfd46a05f219f98"
+    }
+  },
+  "download_size": 1707547,
+  "features": {
+    "input_ids": {
+      "feature": {
+        "dtype": "int32",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "attention_mask": {
+      "feature": {
+        "dtype": "int8",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "labels": {
+      "feature": {
+        "dtype": "int64",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 3525790,
+  "splits": {
+    "training": {
+      "name": "training",
+      "num_bytes": 1319861,
+      "num_examples": 5393,
+      "dataset_name": "csv"
+    },
+    "validationzhihu": {
+      "name": "validationzhihu",
+      "num_bytes": 27744,
+      "num_examples": 100,
+      "dataset_name": "csv"
+    },
+    "validation": {
+      "name": "validation",
+      "num_bytes": 470638,
+      "num_examples": 1896,
+      "dataset_name": "csv"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

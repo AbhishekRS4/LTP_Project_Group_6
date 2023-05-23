@@ -20,10 +20,13 @@ class DataPreprocessor():
         self.datasets = load_from_disk('datasets/touche23/dummy')
 
     def tokenize_dataset(self):
+        raw_dataset_columns = self.datasets['training'].column_names
+
         for split in self.datasets.keys():
             self.datasets[split] = self.datasets[split].map(
                 self._tokenize,
                 batched=True,
+                remove_columns=raw_dataset_columns,
             )
         self.datasets.set_format(type='torch')
 
