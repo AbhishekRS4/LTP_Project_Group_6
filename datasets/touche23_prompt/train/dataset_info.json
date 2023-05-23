@@ -1,0 +1,46 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "Argument ID": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Conclusion": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Stance": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Premise": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "label_vector": {
+      "feature": {
+        "dtype": "int64",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "label_string": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "single_shot_prompt": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "few_shot_prompt": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}
