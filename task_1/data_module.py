@@ -56,3 +56,5 @@ class Touche23DataModule(LightningDataModule):
 if __name__ == '__main__':
     data_module = Touche23DataModule('datasets/touche23/dummy-tokenized')
     train = data_module.train_dataloader()
+    # Prints the first batch of the training set
+    print(next(iter(train)))
