@@ -16,13 +16,16 @@ def label_to_vector(df):
 
 def convert_binary_labels_to_string(df):
     label_names = df.columns[1:]
-    string_labels = []
+    labels = []
 
     for index, row in df.iterrows():
         binary_values = row.values[1:]
-        string_labels.append([label_names[i] for i, value in enumerate(binary_values) if value == 1])
-
-    return string_labels
+        string_labels = ''
+        for i, value in enumerate(binary_values):
+            if value == 1:
+                string_labels += label_names[i] + ', '
+        labels.append(string_labels[:-2])
+    return labels
 
 def single_shot_prompt(df):
     """Creates a single shot prompt for each argument with the first prompt format"""
@@ -42,7 +45,8 @@ def few_shot_prompt(df, num_shots=1, prompt_format=0, random_seed=46):
     
     selected_arguments = df.sample(n=num_shots, random_state=random_seed)
     few_shot_prompts = [
-        prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: {random.choice(LABELS)}\n"
+        # prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: {random.choice(LABELS)}\n"
+        prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: {', '.join(random.sample(LABELS, 2))}\n"
         for _, row in selected_arguments.iterrows()
     ]
     df['few_shot_prompt'] = df.apply(lambda row: ''.join(few_shot_prompts) + prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: \n", axis=1)

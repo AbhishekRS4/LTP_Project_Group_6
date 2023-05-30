@@ -1,11 +1,11 @@
 import numpy as np
+from evaluate import convert_pred_string_labels_to_int_labels
 from pytorch_lightning import LightningModule
 from torch.optim import AdamW
-from transformers import GenerationConfig, T5ForConditionalGeneration, T5Tokenizer
-from torchmetrics.classification import MultilabelF1Score, MultilabelPrecision, MultilabelRecall
-
-
-NUM_CLASSES = 53
+from torchmetrics.classification import (MultilabelF1Score,
+                                         MultilabelPrecision, MultilabelRecall)
+from transformers import (GenerationConfig, T5ForConditionalGeneration,
+                          T5Tokenizer)
 
 
 class LightningT5(LightningModule):
@@ -13,6 +13,7 @@ class LightningT5(LightningModule):
         self,
         model_name_or_path: str = "google/flan-t5-small",
         num_classes: int = 53,
+        gt_string_labels: list = [],
         learning_rate: float = 1e-4,
         weight_decay: float = 0.0,
         **kwargs,
@@ -29,8 +30,10 @@ class LightningT5(LightningModule):
         self.tokenizer: T5Tokenizer = T5Tokenizer.from_pretrained(
             model_name_or_path)
 
-        # Instanciate metrics
         self.num_classes = num_classes
+        self.gt_string_labels = gt_string_labels
+
+        # Instanciate metrics
         self.f1_score = MultilabelF1Score(
             num_labels=self.num_classes,
             average='macro',)
@@ -87,8 +90,17 @@ class LightningT5(LightningModule):
         # reference_texts = self.tokenizer.batch_decode(
         #     batch['labels'], skip_special_tokens=True)
 
-        # @TODO convert output text to a numerical array
         # And compute metrics to log
+        pred_int_labels = convert_pred_string_labels_to_int_labels(
+            generated_text,
+            self.string,
+            delimiter=','
+        )
+        target_int_labels = batch['int_labels']
+
+        self.f1_score.update(pred_int_labels, target_int_labels)
+        self.precision_score.update(pred_int_labels, target_int_labels)
+        self.recall_score.update(pred_int_labels, target_int_labels)
 
         # Also pass input to the model to compute loss
         outputs = self.model(
@@ -98,19 +110,20 @@ class LightningT5(LightningModule):
 
         val_loss = outputs.loss
 
-        self.log_dict({'val/loss': val_loss}, prog_bar=True)
+        self.log_dict({'val/loss': val_loss,
+                       'val/f1': self.f1_score,
+                       'val/precision': self.precision_score,
+                       'val/recall': self.recall_score, },
+                      prog_bar=True)
 
         return {'val_loss': val_loss,
                 'input_text': input_text,
                 'generated_text': generated_text, }
 
     def configure_optimizers(self):
-        # Might also add lr_scheduler
-        # https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#configure-optimizers
         optimizer = AdamW(
             self.model.parameters(),
             lr=self.hparams.learning_rate,
-            weight_decay=self.hparams.weight_decay
         )
         return optimizer
 
