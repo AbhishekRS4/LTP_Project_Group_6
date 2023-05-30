@@ -26,11 +26,8 @@
       "_type": "Sequence"
     },
     "label_string": {
-      "feature": {
-        "dtype": "string",
-        "_type": "Value"
-      },
-      "_type": "Sequence"
+      "dtype": "string",
+      "_type": "Value"
     },
     "single_shot_prompt": {
       "dtype": "string",

@@ -16,13 +16,16 @@ def label_to_vector(df):
 
 def convert_binary_labels_to_string(df):
     label_names = df.columns[1:]
-    string_labels = []
+    labels = []
 
     for index, row in df.iterrows():
         binary_values = row.values[1:]
-        string_labels.append([label_names[i] for i, value in enumerate(binary_values) if value == 1])
-
-    return string_labels
+        string_labels = ''
+        for i, value in enumerate(binary_values):
+            if value == 1:
+                string_labels += label_names[i] + ', '
+        labels.append(string_labels[:-2])
+    return labels
 
 def single_shot_prompt(df):
     """Creates a single shot prompt for each argument with the first prompt format"""
