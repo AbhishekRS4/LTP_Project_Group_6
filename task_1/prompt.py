@@ -45,7 +45,8 @@ def few_shot_prompt(df, num_shots=1, prompt_format=0, random_seed=46):
     
     selected_arguments = df.sample(n=num_shots, random_state=random_seed)
     few_shot_prompts = [
-        prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: {random.choice(LABELS)}\n"
+        # prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: {random.choice(LABELS)}\n"
+        prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: {', '.join(random.sample(LABELS, 2))}\n"
         for _, row in selected_arguments.iterrows()
     ]
     df['few_shot_prompt'] = df.apply(lambda row: ''.join(few_shot_prompts) + prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: \n", axis=1)
