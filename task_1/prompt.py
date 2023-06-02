@@ -53,10 +53,23 @@ def few_shot_prompt(df, num_shots=1, prompt_format=0, random_seed=46):
     return df
 
 
+def add_labels_to_augmented_data(augmented_df, original_df):
+    """add the label_vector and label_string of the original data to the augmented data by matching the Argument ID"""
+    augmented_df['label_vector'] = augmented_df['Argument ID'].map(original_df.set_index('Argument ID')['label_vector'])
+    augmented_df['label_string'] = augmented_df['Argument ID'].map(original_df.set_index('Argument ID')['label_string'])
+    return augmented_df
+
 
 def main():
     data_dir = 'dataset'
     export_path = '../datasets/'
+
+    augmented_files = [
+        'LM.csv',
+        'noise.csv',
+        'thesaurus.csv'
+        ]
+
 
     arguments_files = [
         'arguments-training.tsv',
@@ -74,6 +87,7 @@ def main():
 
     arguments = []
     labels = []
+    augmented = []
 
     # Load argument data
     for file in arguments_files:
@@ -91,11 +105,26 @@ def main():
         else:
             print(f"File not found: {file_path}")
 
+    # Load augmented data
+    for file in augmented_files:
+        file_path = os.path.join(data_dir+'/augmented_data', file)
+        if os.path.exists(file_path):
+            augmented.append(pd.read_csv(file_path))
+        else:
+            print(f"File not found: {file_path}")
+
     # Preprocess argument data
     out = []
     for df, label in zip(arguments, labels):
         df['label_vector'] = label_to_vector(label)
         df['label_string'] = convert_binary_labels_to_string(label)
+        df = single_shot_prompt(df)
+        df = few_shot_prompt(df)
+        out.append(df)
+
+    # Preprocess augmented data use trainig data as reference for labels
+    for df in augmented:
+        df = add_labels_to_augmented_data(df, out[0])
         df = single_shot_prompt(df)
         df = few_shot_prompt(df)
         out.append(df)
@@ -108,6 +137,9 @@ def main():
     dataset_dict["validation"] = Dataset.from_pandas(out[1])
     dataset_dict["validation_zhihu"] = Dataset.from_pandas(out[2])
     dataset_dict["test"] = Dataset.from_pandas(out[3])
+    dataset_dict["augmented_lm"] = Dataset.from_pandas(out[4])
+    dataset_dict["augmented_noise"] = Dataset.from_pandas(out[5])
+    dataset_dict["augmented_thesaurus"] = Dataset.from_pandas(out[6])
 
     dataset_dict.save_to_disk(os.path.join(export_path, 'touche23_prompt'))
     print(f"Dataset succesfully saved to {export_path} as touche23_prompt")
