@@ -18,7 +18,7 @@ def get_logger(args):
     logger = WandbLogger(name=name,
                          project='Touche23',
                          save_dir="logs/",
-                         log_model="all",
+                         log_model=True,
                          entity=args.wandb_entity,
                          config=args)
     return logger
@@ -31,6 +31,7 @@ def get_callbacks(args):
         dirpath=args.checkpoint_save_path,
         filename=time + '-' + 'touche23-{epoch:02d}-{val/f1:.2f}',
         every_n_train_steps=args.val_check_interval,
+        save_top_k=3,
     )
     return [checkpoint]
 
@@ -49,7 +50,8 @@ def train():
 
     data_module = Touche23DataModule(dataset_path=args.data_path,
                                      train_batch_size=args.train_batch_size,
-                                     eval_batch_size=args.eval_batch_size)
+                                     eval_batch_size=args.eval_batch_size,
+                                     num_workers=args.num_workers)
     data_module.report()
 
     if args.neo_mode:
@@ -57,6 +59,12 @@ def train():
                                 num_classes=args.num_classes,
                                 gt_string_labels=list_true_labels,
                                 learning_rate=args.learning_rate)
+    elif args.longT5_mode:
+        model = LightningT5(model_name_or_path=args.model,
+                            num_classes=args.num_classes,
+                            gt_string_labels=list_true_labels,
+                            learning_rate=args.learning_rate,
+                            long_T5=True)
     else:
         model = LightningT5(model_name_or_path=args.model,
                             num_classes=args.num_classes,

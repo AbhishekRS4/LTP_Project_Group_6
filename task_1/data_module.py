@@ -12,6 +12,7 @@ class Touche23DataModule(LightningDataModule):
         max_source_length: int = 512,
         train_batch_size: int = 16,
         eval_batch_size: int = 64,
+        num_workers: int = 1,
     ):
         super().__init__()
         self.train_batch_size = train_batch_size
@@ -19,9 +20,11 @@ class Touche23DataModule(LightningDataModule):
 
         self.dataset_path = dataset_path
 
+        self.num_workers = num_workers
+
         tokenizer = T5Tokenizer.from_pretrained(model_checkpoint)
         self.data_collator = DataCollatorForSeq2Seq(
-            tokenizer, padding=True, max_length=max_source_length, label_pad_token_id=-100)
+            tokenizer, padding=True, label_pad_token_id=-100)
 
         self.save_hyperparameters(ignore=['dataset_path'])
 
@@ -44,6 +47,7 @@ class Touche23DataModule(LightningDataModule):
             shuffle=True,
             batch_size=self.train_batch_size,
             collate_fn=self.data_collator,
+            num_workers=self.num_workers,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -51,6 +55,7 @@ class Touche23DataModule(LightningDataModule):
             self.datasets['validation'],
             batch_size=self.eval_batch_size,
             collate_fn=self.data_collator,
+            num_workers=self.num_workers,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -58,6 +63,7 @@ class Touche23DataModule(LightningDataModule):
             self.datasets['test'],
             batch_size=self.eval_batch_size,
             collate_fn=self.data_collator,
+            num_workers=self.num_workers,
         )
 
 

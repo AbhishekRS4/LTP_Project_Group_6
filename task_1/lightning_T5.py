@@ -6,7 +6,7 @@ import torch
 from torchmetrics.classification import (MultilabelF1Score,
                                          MultilabelPrecision, MultilabelRecall)
 from transformers import (GenerationConfig, T5ForConditionalGeneration,
-                          T5Tokenizer)
+                          T5Tokenizer, LongT5ForConditionalGeneration)
 from data_module import Touche23DataModule
 import pandas as pd
 
@@ -18,10 +18,15 @@ class LightningT5(LightningModule):
         num_classes: int = 20,
         gt_string_labels: list = [],
         learning_rate: float = 1e-4,
+        long_T5: bool = False,
         **kwargs,
     ):
         super().__init__()
         self.model_name_or_path = model_name_or_path
+        self.num_classes = num_classes
+        self.gt_string_labels = gt_string_labels
+        self.learning_rate = learning_rate
+        self.long_T5 = long_T5
 
         # Load model, generation config, and tokenizer
         self.model = self._get_model()
@@ -30,9 +35,6 @@ class LightningT5(LightningModule):
         self.generation_config.max_new_tokens = 128
         self.tokenizer: T5Tokenizer = T5Tokenizer.from_pretrained(
             model_name_or_path)
-
-        self.num_classes = num_classes
-        self.gt_string_labels = gt_string_labels
 
         # Instanciate metrics
         self.f1_score = MultilabelF1Score(
@@ -50,8 +52,12 @@ class LightningT5(LightningModule):
         self.save_hyperparameters()
 
     def _get_model(self):
-        model = T5ForConditionalGeneration.from_pretrained(
-            self.model_name_or_path)
+        if self.long_T5:
+            model = LongT5ForConditionalGeneration.from_pretrained(
+                self.model_name_or_path)
+        else:
+            model = T5ForConditionalGeneration.from_pretrained(
+                self.model_name_or_path)
         return model
 
     def forward(self, **inputs):
@@ -131,7 +137,7 @@ class LightningT5(LightningModule):
     def configure_optimizers(self):
         optimizer = AdamW(
             self.model.parameters(),
-            lr=self.hparams.learning_rate,
+            lr=self.learning_rate,
         )
         return optimizer
 

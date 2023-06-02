@@ -58,4 +58,10 @@ srun --partition=gpushort --gpus-per-node=a100:1 --mem=64GB --time=3:00:00 --job
 ### Check GPU availability
 squeue | grep gpu
 
+### Job info
+squeue -u $USER
+
+### Check disk space
+hbquota
+
 
