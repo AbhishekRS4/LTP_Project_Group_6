@@ -4,7 +4,7 @@ from datasets import Dataset, DatasetDict
 import random
 
 LABELS = ['Self-direction thought', 'Self-direction action', 'Stimulation', 'Hedonism', 'Achievement', 'Power dominance', 'Power resources', 'Face', 'Security personal', 'Security societal', 'Tradition', 'Conformity rules', 'Conformity interpersonal', 'Humility', 'Benevolence caring', 'Benevolence dependability', 'Universalism concern', 'Universalism nature', 'Universalism tolerance', 'Universalism objectivity']
-PROMPT_FORMATS = ["The premise: '{}' is '{}'. The conclusion is '{}'. Value category: {}\n Question: Which value category does the argument belong to?\n",
+PROMPT_FORMATS = ["The premise: '{}' is '{}'. The conclusion is '{}'\n. Question: Which value category does the argument belong to? Options: {} \n",
                   "Premise: {}\nStance: {}\nConclusion: {}. Value category: {}\n Question: Which value category does the argument belong to?\n",
                   "Argument: {}. {}. {}. Value category: {}\n Question: Which value category does the argument belong to?\n"]
 
@@ -51,6 +51,7 @@ def few_shot_prompt(df, num_shots=1, prompt_format=0, random_seed=46):
     ]
     df['few_shot_prompt'] = df.apply(lambda row: ''.join(few_shot_prompts) + prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: \n", axis=1)
     return df
+
 
 
 def main():
