@@ -2,20 +2,22 @@ import numpy as np
 from evaluate import convert_pred_string_labels_to_int_labels
 from pytorch_lightning import LightningModule
 from torch.optim import AdamW
+import torch
 from torchmetrics.classification import (MultilabelF1Score,
                                          MultilabelPrecision, MultilabelRecall)
 from transformers import (GenerationConfig, T5ForConditionalGeneration,
                           T5Tokenizer)
+from data_module import Touche23DataModule
+import pandas as pd
 
 
 class LightningT5(LightningModule):
     def __init__(
         self,
         model_name_or_path: str = "google/flan-t5-small",
-        num_classes: int = 53,
+        num_classes: int = 20,
         gt_string_labels: list = [],
         learning_rate: float = 1e-4,
-        weight_decay: float = 0.0,
         **kwargs,
     ):
         super().__init__()
@@ -52,7 +54,10 @@ class LightningT5(LightningModule):
         return model
 
     def forward(self, **inputs):
-        return self.model(**inputs)
+        return self.model(
+            input_ids=inputs['input_ids'],
+            attention_mask=inputs['attention_mask'],
+            labels=inputs['labels'])
 
     def training_step(self, batch, batch_idx):
         # Pass the batch to the model
@@ -93,10 +98,11 @@ class LightningT5(LightningModule):
         # And compute metrics to log
         pred_int_labels = convert_pred_string_labels_to_int_labels(
             generated_text,
-            self.string,
+            self.gt_string_labels,
             delimiter=','
         )
-        target_int_labels = batch['int_labels']
+        pred_int_labels = torch.from_numpy(pred_int_labels)
+        target_int_labels = batch['int_vec_labels']
 
         self.f1_score.update(pred_int_labels, target_int_labels)
         self.precision_score.update(pred_int_labels, target_int_labels)
@@ -129,4 +135,13 @@ class LightningT5(LightningModule):
 
 
 if __name__ == '__main__':
-    model = LightningT5()
+
+    df_train = pd.read_csv("task_1/dataset/labels-training.tsv", sep="\t")
+    list_true_labels = list(df_train.columns)[1:]
+    model = LightningT5(gt_string_labels=list_true_labels)
+
+    data_module = Touche23DataModule('datasets/touche23_single_shot_prompt')
+    val = data_module.val_dataloader()
+    # Prints the first batch of the training set
+    batch = next(iter(val))
+    model.validation_step(batch, 0)

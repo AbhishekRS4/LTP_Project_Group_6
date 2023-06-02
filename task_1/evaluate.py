@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, recall_score, precision_score
 
+
 def compute_metrics(true_labels, pred_labels, average="macro"):
     acc_sc = accuracy_score(true_labels, pred_labels)
     f1_sc = f1_score(true_labels, pred_labels, average=average)
@@ -16,6 +17,7 @@ def compute_metrics(true_labels, pred_labels, average="macro"):
 
     return
 
+
 def find_closes_true_label(pred_label, list_true_labels):
     closest_true_label = None
     # compute character error scores with all true labels
@@ -26,6 +28,7 @@ def find_closes_true_label(pred_label, list_true_labels):
     # find the closest true label with the smalles character error score
     index_with_min_cer_score = np.argmin(cer_scores)
     return index_with_min_cer_score
+
 
 def convert_pred_string_labels_to_int_labels(string_pred_labels, list_true_labels, delimiter="\t"):
     num_samples = len(string_pred_labels)
@@ -38,6 +41,7 @@ def convert_pred_string_labels_to_int_labels(string_pred_labels, list_true_label
             closest_true_label_index = find_closes_true_label(pred_label, list_true_labels)
             int_labels[sample_index, closest_true_label_index] = 1
     return int_labels
+
 
 def main():
     # example to compute metrics
@@ -66,4 +70,5 @@ def main():
     return
 
 
-main()
+if __name__ == '__main__':
+    main()

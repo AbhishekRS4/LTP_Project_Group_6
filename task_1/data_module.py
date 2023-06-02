@@ -30,9 +30,17 @@ class Touche23DataModule(LightningDataModule):
     def _load_dataset(self) -> dict:
         return load_from_disk(self.dataset_path)
 
+    def report(self):
+        print('Training data:')
+        print(self.datasets['train'])
+        print('Validation data:')
+        print(self.datasets['validation'])
+        print('Testing data:')
+        print(self.datasets['test'])
+
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
-            self.datasets['training'],
+            self.datasets['train'],
             shuffle=True,
             batch_size=self.train_batch_size,
             collate_fn=self.data_collator,
