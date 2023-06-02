@@ -22,7 +22,7 @@ def get_args_parser():
                         help='The maximum number of epochs to train for.')
     parser.add_argument('--log_every_n_steps', type=int, default=25,
                         help='The number of training steps to log after.')
-    parser.add_argument('--val_check_interval', type=int, default=1.0,
+    parser.add_argument('--val_check_interval', type=float, default=1.0,
                         help='The proportion of training steps between each validation run.')
     parser.add_argument('--limit_val_batches', type=int, default=32,
                         help='The number of batches to use for validation.')
@@ -30,10 +30,12 @@ def get_args_parser():
                         help='The number of output classes.')
     parser.add_argument('--wandb_entity', type=str, default='language-technology-project',
                         help='WandB entity to log to.')
-    parser.add_argument('--force_cpu', type=bool, default=True,
-                        help='Forcing to use cpu when training when set to True.')
+    parser.add_argument('--force_cpu', type=int, default=0,
+                        help='Forcing to use cpu when training when set to 1.')
     parser.add_argument('--prompt_mode', type=str, default='few_shot',
                         help='Prompt mode used when finetuning.')
+    parser.add_argument('--neo_mode', type=int, default=0,
+                        help='Whether to go absolutely overkill and use GPTNeoX')
 
     args = parser.parse_args()
     return args

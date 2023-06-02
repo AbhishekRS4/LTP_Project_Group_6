@@ -5,16 +5,15 @@ from torch.optim import AdamW
 import torch
 from torchmetrics.classification import (MultilabelF1Score,
                                          MultilabelPrecision, MultilabelRecall)
-from transformers import (GenerationConfig, T5ForConditionalGeneration,
-                          T5Tokenizer)
+from transformers import GPTNeoXForCausalLM, GPTNeoXTokenizerFast
 from data_module import Touche23DataModule
 import pandas as pd
 
 
-class LightningT5(LightningModule):
+class LightningGPTNeo(LightningModule):
     def __init__(
         self,
-        model_name_or_path: str = "google/flan-t5-small",
+        model_name_or_path: str = "EleutherAI/gpt-neox-20b",
         num_classes: int = 20,
         gt_string_labels: list = [],
         learning_rate: float = 1e-4,
@@ -25,10 +24,7 @@ class LightningT5(LightningModule):
 
         # Load model, generation config, and tokenizer
         self.model = self._get_model()
-        self.generation_config = GenerationConfig.from_pretrained(
-            model_name_or_path)
-        self.generation_config.max_new_tokens = 128
-        self.tokenizer: T5Tokenizer = T5Tokenizer.from_pretrained(
+        self.tokenizer = GPTNeoXTokenizerFast.from_pretrained(
             model_name_or_path)
 
         self.num_classes = num_classes
@@ -50,8 +46,7 @@ class LightningT5(LightningModule):
         self.save_hyperparameters()
 
     def _get_model(self):
-        model = T5ForConditionalGeneration.from_pretrained(
-            self.model_name_or_path)
+        model = GPTNeoXForCausalLM.from_pretrained(self.model_name_or_path)
         return model
 
     def forward(self, **inputs):
@@ -86,7 +81,7 @@ class LightningT5(LightningModule):
         # Generate outputs given a batch
         generated_out = self.model.generate(
             inputs=batch['input_ids'],
-            generation_config=self.generation_config)
+            max_length=50)
 
         # Convert the input, generated, and reference tokens to text
         input_text = self.tokenizer.batch_decode(

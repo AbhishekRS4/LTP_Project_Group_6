@@ -43,3 +43,19 @@ rsync -aP dataset_files.tar s0000000@login1.hb.hpc.rug.nl:/projects/s0000000/
 * First copy any files to `/projects/s0000000/` since this is a permanent storage but cannot be accessed by the cluster
 * Copy files needed by the scripts to `/scratch/s0000000/`
 * After this, load the files in the scripts from the appropriate paths in `/scratch/s0000000/`
+
+## Commands for Jeroen
+
+### Login
+ssh s3416402@login1.hb.hpc.rug.nl
+
+### Copy repo
+rsync -r LTP_Project_Group_6 s3416402@login1.hb.hpc.rug.nl:/home3/s3416402/
+
+### Interactive command line
+srun --partition=gpushort --gpus-per-node=a100:1 --mem=64GB --time=3:00:00 --job-name=test --pty /bin/bash
+
+### Check GPU availability
+squeue | grep gpu
+
+

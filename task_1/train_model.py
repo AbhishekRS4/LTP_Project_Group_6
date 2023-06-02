@@ -4,6 +4,7 @@ from datetime import datetime
 import pandas as pd
 from data_module import Touche23DataModule
 from lightning_T5 import LightningT5
+from lightning_GPTNeo import LightningGPTNeo
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
@@ -25,9 +26,10 @@ def get_logger(args):
 
 def get_callbacks(args):
     checkpoint = ModelCheckpoint(
-        monitor='val/loss',
+        monitor='val/f1',
+        mode='max',
         dirpath=args.checkpoint_save_path,
-        filename=time + '-' + 'touche23-{epoch:02d}-{val/loss:.2f}',
+        filename=time + '-' + 'touche23-{epoch:02d}-{val/f1:.2f}',
         every_n_train_steps=args.val_check_interval,
     )
     return [checkpoint]
@@ -35,6 +37,8 @@ def get_callbacks(args):
 
 def train():
     args = get_args_parser()
+
+    print(args)
 
     if args.checkpoint_save_path:
         args.checkpoint_save_path = os.path.expanduser(
@@ -47,10 +51,18 @@ def train():
                                      train_batch_size=args.train_batch_size,
                                      eval_batch_size=args.eval_batch_size)
     data_module.report()
-    model = LightningT5(model_name_or_path=args.model,
-                        num_classes=args.num_classes,
-                        gt_string_labels=list_true_labels,
-                        learning_rate=args.learning_rate)
+
+    if args.neo_mode:
+        model = LightningGPTNeo(model_name_or_path=args.model,
+                                num_classes=args.num_classes,
+                                gt_string_labels=list_true_labels,
+                                learning_rate=args.learning_rate)
+    else:
+        model = LightningT5(model_name_or_path=args.model,
+                            num_classes=args.num_classes,
+                            gt_string_labels=list_true_labels,
+                            learning_rate=args.learning_rate)
+
     callbacks = get_callbacks(args)
     logger = get_logger(args)
 

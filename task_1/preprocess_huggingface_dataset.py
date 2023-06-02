@@ -1,5 +1,6 @@
 from transformers import T5Tokenizer
 from datasets import load_dataset, load_from_disk
+from transformers import GPTNeoXTokenizerFast
 
 
 class DataPreprocessor():
@@ -10,11 +11,15 @@ class DataPreprocessor():
                  model_checkpoint: str = 'google/flan-t5-small',
                  input_col_name: str = 'single_shot_prompt',
                  max_source_length: int = 512,
-                 max_target_length: int = 128,) -> None:
+                 max_target_length: int = 128,
+                 neo_mode: int = 0,) -> None:
 
         self.dataset_load_path = dataset_load_path
         self.dataset_save_path = dataset_save_path + '_' + input_col_name
-        self.tokenizer = T5Tokenizer.from_pretrained(model_checkpoint)
+        if not neo_mode:
+            self.tokenizer = T5Tokenizer.from_pretrained(model_checkpoint)
+        else:
+            self.tokenizer = GPTNeoXTokenizerFast.from_pretrained(model_checkpoint)
         self.input_col_name = input_col_name
         self.max_source_length = max_source_length
         self.max_target_length = max_target_length
@@ -49,8 +54,17 @@ class DataPreprocessor():
 
 
 if __name__ == "__main__":
-    preprocessor = DataPreprocessor()
+    model_checkpoint = "google/flan-t5-base"
+    dataset_save_path = 'datasets/touche23'
+    max_source_length = 512
+    # max_source_length = 2048
+    # input_col_name = 'single_shot_prompt'
+    input_col_name = 'few_shot_prompt'
+    preprocessor = DataPreprocessor(dataset_save_path=dataset_save_path,
+                                    model_checkpoint=model_checkpoint,
+                                    max_source_length=max_source_length,
+                                    input_col_name=input_col_name
+                                    )
     preprocessor.load_dataset()
     preprocessor.tokenize_dataset()
-    print(preprocessor.datasets['train'])
     preprocessor.save_dataset()
