@@ -4,9 +4,11 @@ import argparse
 def get_args_parser():
     parser = argparse.ArgumentParser(description='Training parameters')
 
-    parser.add_argument('--model', type=str, default='google/long-t5-local-base',
+    parser.add_argument('--model', type=str, default='google/flan-t5-base',
                         help='The name or path of the model to be trained.')
-    parser.add_argument('--data_path', type=str, default='datasets/touche23_long_single_shot_prompt',
+    parser.add_argument('--load_checkpoint', type=str, default=None,
+                        help='The name or path of the model to be trained.')
+    parser.add_argument('--data_path', type=str, default='datasets/touche23_single_shot_prompt',
                         help='The path to the dataset.')
     parser.add_argument('--run_name', type=str, default='Test_T5',
                         help='The name of the run.')
@@ -34,7 +36,7 @@ def get_args_parser():
                         help='Forcing to use cpu when training when set to 1.')
     parser.add_argument('--prompt_mode', type=str, default='few_shot',
                         help='Prompt mode used when finetuning.')
-    parser.add_argument('--longT5_mode', type=int, default=1,
+    parser.add_argument('--longT5_mode', type=int, default=0,
                         help='Whether to use longT5')
     parser.add_argument('--num_workers', type=int, default=0,
                         help='Number of workers to use for data loading')

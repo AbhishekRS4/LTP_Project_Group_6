@@ -52,6 +52,9 @@ ssh s3416402@login1.hb.hpc.rug.nl
 ### Copy repo
 rsync -r LTP_Project_Group_6 s3416402@login1.hb.hpc.rug.nl:/home3/s3416402/
 
+rsync -r s3416402@login1.hb.hpc.rug.nl:/scratch/s3416402/models/test_lower_loss artifacts/
+
+
 ### Interactive command line
 srun --partition=gpushort --gpus-per-node=a100:1 --mem=64GB --time=3:00:00 --job-name=test --pty /bin/bash
 

@@ -58,7 +58,7 @@ class DataPreprocessor():
             print(split + ' data:')
             print(self.datasets[split])
 
-    def combine_augmented_datasets(self, proportion_data_to_keep=0.40):
+    def combine_augmented_datasets(self, proportion_data_to_keep=0.20):
         lm = self.datasets['augmented_lm'].shuffle(seed=SEED)
         noise = self.datasets['augmented_noise'].shuffle(seed=SEED)
         thesaurus = self.datasets['augmented_thesaurus'].shuffle(seed=SEED)
@@ -104,7 +104,7 @@ def preprocess_augmented_dataset(long_T5=False, single_shot=True):
 
     if long_T5:
         model_checkpoint = "google/long-t5-local-base"
-        dataset_save_path = 'datasets/touche23_prompt_aug_long_large'
+        dataset_save_path = 'datasets/touche23_prompt_aug_long'
         max_source_length = 2048
     else:
         model_checkpoint = "google/flan-t5-base"
@@ -134,4 +134,4 @@ def preprocess_augmented_dataset(long_T5=False, single_shot=True):
 
 
 if __name__ == "__main__":
-    preprocess_augmented_dataset(long_T5=True)
+    preprocess_augmented_dataset(long_T5=True, single_shot=False)

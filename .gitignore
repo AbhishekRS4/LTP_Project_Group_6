@@ -3,3 +3,7 @@ datasets/
 
 __pycache__
 task_1/__pycache__
+
+artifacts/
+wandb/
+lightning_logs/
