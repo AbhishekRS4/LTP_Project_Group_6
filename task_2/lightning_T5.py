@@ -31,6 +31,7 @@ class LightningT5(LightningModule):
             model_name_or_path)
         self.generation_config.max_new_tokens = 128
         self.tokenizer = self._get_tokenizer()
+        self.dict_labels = {}
 
     def _get_model(self):
         if self.long_T5:
@@ -67,20 +68,23 @@ class LightningT5(LightningModule):
             batch['input_ids'], skip_special_tokens=True)
         generated_text = self.tokenizer.batch_decode(
             generated_out, skip_special_tokens=True)
-        # reference_texts = self.tokenizer.batch_decode(
-        #     batch['labels'], skip_special_tokens=True)
 
-        # And compute metrics to log
         pred_int_labels = convert_pred_string_labels_to_int_labels(
             generated_text,
             self.gt_string_labels,
             delimiter=','
         )
 
-        if all_predictions is None:
-            all_predictions = np.array(pred_int_labels)
-        else:
-            all_predictions += np.array(pred_int_labels)
+        pred_int_labels = np.sum(pred_int_labels, axis=0)
+        for label_index in range(len(pred_int_labels)):
+            if label_index not in self.dict_labels:
+                self.dict_labels[f"{label_index}"] = pred_int_labels[label_index]
+            else:
+                temp = self.dict_labels[f"{label_index}"]
+                temp += pred_int_labels[label_index]
+                self.dict_labels[f"{label_index}"] = temp
+
+        self.log_dict(self.dict_labels, reduce_fx="sum")
 
         return all_predictions
 
