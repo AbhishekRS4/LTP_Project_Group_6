@@ -29,11 +29,11 @@ class LightningT5(LightningModule):
         self.long_T5 = long_T5
 
         # Load model, generation config, and tokenizer
-        self.model = self._get_model()
         self.generation_config = GenerationConfig.from_pretrained(
             model_name_or_path)
         self.generation_config.max_new_tokens = 128
         self.tokenizer = self._get_tokenizer()
+        self.model = self._get_model()
 
         # Instanciate metrics
         self.f1_score = MultilabelF1Score(
@@ -173,21 +173,19 @@ class LightningT5(LightningModule):
         self.recall_score.update(pred_int_labels, target_int_labels)
 
         # Also pass input to the model to compute loss
-        outputs = self.model(
-            input_ids=batch['input_ids'],
-            attention_mask=batch['attention_mask'],
-            labels=batch['labels'])
+        # outputs = self.model(
+        #     input_ids=batch['input_ids'],
+        #     attention_mask=batch['attention_mask'],
+        #     labels=batch['labels'])
 
-        val_loss = outputs.loss
+        # val_loss = outputs.loss
 
-        self.log_dict({'test/loss': val_loss,
-                       'test/f1': self.f1_score,
+        self.log_dict({'test/f1': self.f1_score,
                        'test/precision': self.precision_score,
                        'test/recall': self.recall_score, },
                       prog_bar=True)
 
-        return {'test_loss': val_loss,
-                'input_text': input_text,
+        return {'input_text': input_text,
                 'generated_text': generated_text, }
 
     def configure_optimizers(self):

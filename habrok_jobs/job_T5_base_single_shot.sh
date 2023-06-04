@@ -5,7 +5,7 @@
 #SBATCH --mem=64GB
 
 # Use scratch due to limited space on /home
-# export HF_HOME=/scratch/$USER/.cache/huggingface
+export HF_HOME=/scratch/$USER/.cache/huggingface
 export WANDB_CACHE_DIR=/scratch/$USER/.cache/wandb
 
 # Copy repo to local
@@ -34,7 +34,9 @@ python3 task_1/train_model.py \
 --val_check_interval 1.0 \
 --limit_val_batches 1.0 \
 --force_cpu 0 \
---num_workers 16 \
---prompt_mode single_shot
+--num_workers 1 \
+--prompt_mode single_shot \
+--longT5_mode 0
+
 
 deactivate
