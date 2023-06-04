@@ -1,2 +1,5 @@
 .vscode/
 datasets/
+
+__pycache__
+task_1/__pycache__

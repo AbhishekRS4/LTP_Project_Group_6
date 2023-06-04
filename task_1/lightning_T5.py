@@ -1,5 +1,5 @@
 import numpy as np
-from evaluate import convert_pred_string_labels_to_int_labels
+from utils import convert_pred_string_labels_to_int_labels
 from pytorch_lightning import LightningModule
 from torch.optim import AdamW
 import torch
@@ -137,6 +137,56 @@ class LightningT5(LightningModule):
                       prog_bar=True)
 
         return {'val_loss': val_loss,
+                'input_text': input_text,
+                'generated_text': generated_text, }
+
+    def test_step(self, batch, batch_idx, dataloader_idx=0):
+        # Generate outputs given a batch
+        generated_out = self.model.generate(
+            inputs=batch['input_ids'],
+            generation_config=self.generation_config)
+
+        # Convert the input, generated, and reference tokens to text
+        input_text = self.tokenizer.batch_decode(
+            batch['input_ids'], skip_special_tokens=True)
+        generated_text = self.tokenizer.batch_decode(
+            generated_out, skip_special_tokens=True)
+        # reference_texts = self.tokenizer.batch_decode(
+        #     batch['labels'], skip_special_tokens=True)
+
+        # And compute metrics to log
+        pred_int_labels = convert_pred_string_labels_to_int_labels(
+            generated_text,
+            self.gt_string_labels,
+            delimiter=','
+        )
+        pred_int_labels = torch.from_numpy(pred_int_labels)
+        pred_int_labels = pred_int_labels.to(device=self.device.type)
+        target_int_labels = batch['int_vec_labels']
+
+        # use for debug purposes
+        # print(target_int_labels)
+        # print(generated_text, pred_int_labels)
+
+        self.f1_score.update(pred_int_labels, target_int_labels)
+        self.precision_score.update(pred_int_labels, target_int_labels)
+        self.recall_score.update(pred_int_labels, target_int_labels)
+
+        # Also pass input to the model to compute loss
+        outputs = self.model(
+            input_ids=batch['input_ids'],
+            attention_mask=batch['attention_mask'],
+            labels=batch['labels'])
+
+        val_loss = outputs.loss
+
+        self.log_dict({'test/loss': val_loss,
+                       'test/f1': self.f1_score,
+                       'test/precision': self.precision_score,
+                       'test/recall': self.recall_score, },
+                      prog_bar=True)
+
+        return {'test_loss': val_loss,
                 'input_text': input_text,
                 'generated_text': generated_text, }
 
