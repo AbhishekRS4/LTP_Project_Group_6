@@ -1,6 +1,6 @@
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
-from transformers import DataCollatorForSeq2Seq, T5Tokenizer
+from transformers import DataCollatorForSeq2Seq, T5Tokenizer, AutoTokenizer
 from datasets import load_dataset, load_from_disk
 
 
@@ -13,6 +13,7 @@ class Touche23DataModule(LightningDataModule):
         train_batch_size: int = 16,
         eval_batch_size: int = 64,
         num_workers: int = 1,
+        long_T5: int = 0,
     ):
         super().__init__()
         self.train_batch_size = train_batch_size
@@ -20,9 +21,11 @@ class Touche23DataModule(LightningDataModule):
 
         self.dataset_path = dataset_path
 
+        self.model_checkpoint = model_checkpoint
         self.num_workers = num_workers
+        self.long_T5 = long_T5
 
-        tokenizer = T5Tokenizer.from_pretrained(model_checkpoint)
+        tokenizer = self._get_tokenizer()
         self.data_collator = DataCollatorForSeq2Seq(
             tokenizer, padding=True, label_pad_token_id=-100)
 
@@ -32,6 +35,13 @@ class Touche23DataModule(LightningDataModule):
 
     def _load_dataset(self) -> dict:
         return load_from_disk(self.dataset_path)
+
+    def _get_tokenizer(self):
+        if self.long_T5:
+            tokenizer = AutoTokenizer.from_pretrained(self.model_checkpoint)
+        else:
+            tokenizer = T5Tokenizer.from_pretrained(self.model_checkpoint)
+        return tokenizer
 
     def report(self):
         print('Training data:')

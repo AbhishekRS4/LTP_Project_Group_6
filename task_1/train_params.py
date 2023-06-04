@@ -6,7 +6,7 @@ def get_args_parser():
 
     parser.add_argument('--model', type=str, default='google/long-t5-local-base',
                         help='The name or path of the model to be trained.')
-    parser.add_argument('--data_path', type=str, default='datasets/touche23_single_shot_prompt',
+    parser.add_argument('--data_path', type=str, default='datasets/touche23_long_single_shot_prompt',
                         help='The path to the dataset.')
     parser.add_argument('--run_name', type=str, default='Test_T5',
                         help='The name of the run.')
@@ -14,9 +14,9 @@ def get_args_parser():
                         help='The path to the directory where checkpoints will be saved.')
     parser.add_argument('--learning_rate', type=float, default=1e-4,
                         help='The learning rate used for training.')
-    parser.add_argument('--train_batch_size', type=int, default=32,
+    parser.add_argument('--train_batch_size', type=int, default=1,
                         help='The batch size used for training.')
-    parser.add_argument('--eval_batch_size', type=int, default=32,
+    parser.add_argument('--eval_batch_size', type=int, default=1,
                         help='The batch size used for validation and testing.')
     parser.add_argument('--max_epochs', type=int, default=10,
                         help='The maximum number of epochs to train for.')
@@ -34,11 +34,9 @@ def get_args_parser():
                         help='Forcing to use cpu when training when set to 1.')
     parser.add_argument('--prompt_mode', type=str, default='few_shot',
                         help='Prompt mode used when finetuning.')
-    parser.add_argument('--neo_mode', type=int, default=0,
-                        help='Whether to go absolutely overkill and use GPTNeoX')
     parser.add_argument('--longT5_mode', type=int, default=1,
                         help='Whether to use longT5')
-    parser.add_argument('--num_workers', type=int, default=1,
+    parser.add_argument('--num_workers', type=int, default=0,
                         help='Number of workers to use for data loading')
 
     args = parser.parse_args()

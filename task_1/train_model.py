@@ -51,25 +51,15 @@ def train():
     data_module = Touche23DataModule(dataset_path=args.data_path,
                                      train_batch_size=args.train_batch_size,
                                      eval_batch_size=args.eval_batch_size,
-                                     num_workers=args.num_workers)
+                                     num_workers=args.num_workers,
+                                     long_T5=args.longT5_mode)
     data_module.report()
 
-    if args.neo_mode:
-        model = LightningGPTNeo(model_name_or_path=args.model,
-                                num_classes=args.num_classes,
-                                gt_string_labels=list_true_labels,
-                                learning_rate=args.learning_rate)
-    elif args.longT5_mode:
-        model = LightningT5(model_name_or_path=args.model,
-                            num_classes=args.num_classes,
-                            gt_string_labels=list_true_labels,
-                            learning_rate=args.learning_rate,
-                            long_T5=True)
-    else:
-        model = LightningT5(model_name_or_path=args.model,
-                            num_classes=args.num_classes,
-                            gt_string_labels=list_true_labels,
-                            learning_rate=args.learning_rate)
+    model = LightningT5(model_name_or_path=args.model,
+                        num_classes=args.num_classes,
+                        gt_string_labels=list_true_labels,
+                        learning_rate=args.learning_rate,
+                        long_T5=args.longT5_mode)
 
     callbacks = get_callbacks(args)
     logger = get_logger(args)

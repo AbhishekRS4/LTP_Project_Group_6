@@ -22,9 +22,9 @@ cd $TMPDIR/LTP_Project_Group_6
 
 which python3
 python3 task_1/train_model.py \
---model google/flan-t5-base \
---data_path datasets/touche23_single_shot_prompt \
---run_name T5_base \
+--model google/long-t5-local-base \
+--data_path datasets/touche23_long_single_shot_prompt \
+--run_name longT5_base \
 --checkpoint_save_path /scratch/$USER/models/ \
 --learning_rate 1e-4 \
 --train_batch_size 32 \
@@ -35,6 +35,7 @@ python3 task_1/train_model.py \
 --limit_val_batches 1.0 \
 --force_cpu 0 \
 --num_workers 16 \
---prompt_mode single_shot
+--prompt_mode single_shot \
+--longT5_mode 1
 
 deactivate

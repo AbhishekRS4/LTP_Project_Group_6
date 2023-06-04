@@ -6,7 +6,7 @@ import torch
 from torchmetrics.classification import (MultilabelF1Score,
                                          MultilabelPrecision, MultilabelRecall)
 from transformers import (GenerationConfig, T5ForConditionalGeneration,
-                          T5Tokenizer, LongT5ForConditionalGeneration)
+                          T5Tokenizer, LongT5ForConditionalGeneration, AutoTokenizer)
 from data_module import Touche23DataModule
 import pandas as pd
 
@@ -18,7 +18,7 @@ class LightningT5(LightningModule):
         num_classes: int = 20,
         gt_string_labels: list = [],
         learning_rate: float = 1e-4,
-        long_T5: bool = False,
+        long_T5: int = 0,
         **kwargs,
     ):
         super().__init__()
@@ -33,8 +33,7 @@ class LightningT5(LightningModule):
         self.generation_config = GenerationConfig.from_pretrained(
             model_name_or_path)
         self.generation_config.max_new_tokens = 128
-        self.tokenizer: T5Tokenizer = T5Tokenizer.from_pretrained(
-            model_name_or_path)
+        self.tokenizer = self._get_tokenizer()
 
         # Instanciate metrics
         self.f1_score = MultilabelF1Score(
@@ -59,6 +58,13 @@ class LightningT5(LightningModule):
             model = T5ForConditionalGeneration.from_pretrained(
                 self.model_name_or_path)
         return model
+
+    def _get_tokenizer(self):
+        if self.long_T5:
+            tokenizer = AutoTokenizer.from_pretrained(self.model_name_or_path)
+        else:
+            tokenizer = T5Tokenizer.from_pretrained(self.model_name_or_path)
+        return tokenizer
 
     def forward(self, **inputs):
         return self.model(
