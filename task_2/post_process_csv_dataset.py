@@ -20,6 +20,8 @@ def get_author_comment_count(ARGS):
     df_subreddits = df_subreddits.dropna()
     #print(df_subreddits.head())
     print(df_subreddits.value_counts("author").head(ARGS.top_k_authors))
+
+    df_subreddits.to_csv("subreddit_threads.csv", index=False)
     return
 
 def main():
