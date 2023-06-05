@@ -8,7 +8,7 @@ def get_author_comment_count(ARGS):
 
     # replace all empties with Nans
     df_subreddits['author'].replace('', np.nan, inplace=True)
-    df_subreddits['subreddit'].replace('', np.nan, inplace=True)
+    df_subreddits['score'].replace('', 0, inplace=True)
     df_subreddits['body'].replace('', np.nan, inplace=True)
     #print(df_subreddits.head())
 
@@ -19,6 +19,7 @@ def get_author_comment_count(ARGS):
     # drop Nans
     df_subreddits = df_subreddits.dropna()
     #print(df_subreddits.head())
+    print("Authors with most comments")
     print(df_subreddits.value_counts("author").head(ARGS.top_k_authors))
 
     df_subreddits.to_csv("subreddit_threads.csv", index=False)
