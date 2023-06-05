@@ -23,7 +23,8 @@ def test(ARGS):
 
     model = LightningT5(model_name_or_path=ARGS.model,
                         num_classes=ARGS.num_classes,
-                        gt_string_labels=list_true_labels,)
+                        gt_string_labels=list_true_labels,
+                        author_dataset=ARGS.dataset_path.split("/")[1])
 
     trainer = Trainer(
         accelerator=accelerator,
@@ -32,7 +33,40 @@ def test(ARGS):
     )
 
     all_predictions = trainer.test(model=model, ckpt_path=ARGS.file_path_model, dataloaders=data_module)
-    print(all_predictions)
+    model.csv_writer.close()
+    #print(all_predictions)
+    return
+
+def test_multi(ARGS):
+    accelerator = "cpu"
+    os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+    accelerator = "gpu" if torch.cuda.is_available() else "cpu"
+
+    df_train = pd.read_csv(ARGS.file_labels_tsv, sep="\t")
+    list_true_labels = list(df_train.columns)[1:]
+
+    dir_datasets = "author_datasets_preprocessed_prompt"
+    list_datasets = os.listdir(dir_datasets)
+
+    for dataset_path in list_datasets:
+        data_module = ChangeMyViewDataModule(dataset_path=os.path.join(dir_datasets, dataset_path),
+                                             eval_batch_size=ARGS.batch_size,
+                                             num_workers=ARGS.num_workers)
+
+        model = LightningT5(model_name_or_path=ARGS.model,
+                            num_classes=ARGS.num_classes,
+                            gt_string_labels=list_true_labels,
+                            author_dataset=dataset_path)
+
+        trainer = Trainer(
+            accelerator=accelerator,
+            devices="auto",
+            limit_test_batches=ARGS.limit_test_batches,
+        )
+
+        all_predictions = trainer.test(model=model, ckpt_path=ARGS.file_path_model, dataloaders=data_module)
+        model.csv_writer.close()
+    #print(all_predictions)
     return
 
 def main():
@@ -53,15 +87,15 @@ def main():
                         help="Full path to trained model file")
     parser.add_argument("--num_classes", type=int, default=20,
                         help="The number of output classes.")
-    parser.add_argument("--num_workers", type=int, default=1,
+    parser.add_argument("--num_workers", type=int, default=4,
                         help="Number of workers to use for data loading")
     parser.add_argument("--batch_size", type=int, default=32,
                         help="batch size to use for testing")
-    parser.add_argument("--limit_test_batches", type=float, default=1,
+    parser.add_argument("--limit_test_batches", type=float, default=1.0,
                         help="fraction of test batches to be used")
 
     ARGS = parser.parse_args()
-    test(ARGS)
+    test_multi(ARGS)
     return
 
 if __name__ == "__main__":
