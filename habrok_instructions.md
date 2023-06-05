@@ -50,7 +50,7 @@ rsync -aP dataset_files.tar s0000000@login1.hb.hpc.rug.nl:/projects/s0000000/
 ssh s3416402@login1.hb.hpc.rug.nl
 
 ### Copy repo
-rsync -r LTP_Project_Group_6 s3416402@login1.hb.hpc.rug.nl:/home3/s3416402/
+rsync -r LTP_Project_Group_6 s3374610@login1.hb.hpc.rug.nl:/home3/s3374610/
 
 rsync -r s3416402@login1.hb.hpc.rug.nl:/scratch/s3416402/models/test_lower_loss artifacts/
 

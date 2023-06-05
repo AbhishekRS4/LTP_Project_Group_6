@@ -16,12 +16,19 @@ def single_shot_prompt(df):
     return df
 
 
+def remove_line_breaks(df):
+    """Removes line breaks from the arguments"""
+    df['body'] = df['body'].str.replace('\n', ' ')
+    return df
+
 if __name__ == "__main__":
     # load data
     df = pd.read_csv('subreddit_threads.csv')
+
+    df = remove_line_breaks(df)
 
     # create single shot prompt
     df = single_shot_prompt(df)
 
     # save data
-    df.to_csv('subreddit_threads.csv', index=False)  
+    df.to_csv('subreddit_threads_prompt.csv', index=False)  
