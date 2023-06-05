@@ -80,6 +80,18 @@ def preprocess_argument_dataset(dataset_load_path, dataset_save_path, long_T5=Fa
 def get_author_comment_count(ARGS):
     df_subreddits = pd.read_csv(ARGS.file_csv)
     #print(df_subreddits.value_counts("author").head(ARGS.top_k_authors))
+
+    # drop empty
+    df_subreddits['author'].replace('', np.nan, inplace=True)
+    df_subreddits['subreddit'].replace('', np.nan, inplace=True)
+    df_subreddits['body'].replace('', np.nan, inplace=True)
+
+    # drop duplicates
+    df_subreddits.drop_duplicates(keep='first', inplace=True)
+
+    # drop Nans
+    df_subreddits = df_subreddits.dropna()
+
     if not os.path.isdir(ARGS.dir_path_orig):
         os.makedirs(ARGS.dir_path_orig)
 
