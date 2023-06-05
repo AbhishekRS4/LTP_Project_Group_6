@@ -1,0 +1,17 @@
+Test results:
+test/f1:0.36964961886405945
+test/precision:0.41717591881752014
+test/recall:0.4140135645866394
+
+Test params:
+results_save_file:results_task1/long_t5_base_single_shot
+model_type:google/long-t5-local-base
+dataset_path:datasets/touche23_long_single_shot_prompt
+file_labels_tsv:task_1/dataset/labels-training.tsv
+file_path_model:artifacts/longT5_base_single_shot_0602-18:49:33/model.ckpt
+num_classes:20
+num_workers:1
+eval_batch_size:32
+limit_test_batches:1.0
+longT5_mode:1
+force_cpu:1

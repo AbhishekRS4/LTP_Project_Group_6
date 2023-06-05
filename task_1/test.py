@@ -9,14 +9,14 @@ from pytorch_lightning import Trainer
 
 
 def get_test_args():
-    # results_save_file = 'results_task1/flan-t5-single-shot-trained-short'
-    results_save_file = 'results_task1/long_t5_base_single_shot'
+    results_save_file = 'results_task1/flan-t5-base-few-shot'
+    # results_save_file = 'results_task1/long_t5_base_augmented_single_shot'
 
-    # model_type = 'google/flan-t5-base'
-    model_type = 'google/long-t5-local-base'
-    longT5_mode = 1
-    dataset_path = "datasets/touche23_long_single_shot_prompt"
-    file_path_model = "artifacts/longT5_base_single_shot_0602-18:49:33/model.ckpt"
+    model_type = 'google/flan-t5-base'
+    # model_type = 'google/long-t5-local-base'
+    longT5_mode = 0
+    dataset_path = "datasets/touche23_few_shot_prompt"
+    file_path_model = "artifacts/T5_base_few_shot_0604-15:26:47/f1=0.79.ckpt"
     # file_path_model = "artifacts/T5_base_single_shot_0604-12:44:31/model.ckpt"
     file_labels_tsv = "task_1/dataset/labels-training.tsv"
     force_cpu = 1
