@@ -37,7 +37,7 @@ def test(ARGS):
 
 def main():
     model = "google/flan-t5-base"
-    dataset_path = "author_datasets_preprocessed/arguments_Amablue_body/"
+    dataset_path = "author_datasets_preprocessed/arguments_DeltaBot_body/"
     file_path_model = "/home/abhishek/Desktop/RUG/lang_tech_project/model_checkpoints/model.ckpt"
     file_labels_tsv = "../task_1/dataset/labels-training.tsv"
 
@@ -57,7 +57,7 @@ def main():
                         help="Number of workers to use for data loading")
     parser.add_argument("--batch_size", type=int, default=32,
                         help="batch size to use for testing")
-    parser.add_argument("--limit_test_batches", type=float, default=0.01,
+    parser.add_argument("--limit_test_batches", type=float, default=1,
                         help="fraction of test batches to be used")
 
     ARGS = parser.parse_args()
