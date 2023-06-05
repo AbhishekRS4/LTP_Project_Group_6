@@ -1,5 +1,5 @@
 import numpy as np
-from evaluate import convert_pred_string_labels_to_int_labels
+from utils import convert_pred_string_labels_to_int_labels
 from pytorch_lightning import LightningModule
 from torch.optim import AdamW
 import torch

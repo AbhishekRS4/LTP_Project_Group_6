@@ -3,7 +3,8 @@ import pandas as pd
 from datasets import Dataset, DatasetDict
 import random
 
-LABELS = ['Self-direction thought', 'Self-direction action', 'Stimulation', 'Hedonism', 'Achievement', 'Power dominance', 'Power resources', 'Face', 'Security personal', 'Security societal', 'Tradition', 'Conformity rules', 'Conformity interpersonal', 'Humility', 'Benevolence caring', 'Benevolence dependability', 'Universalism concern', 'Universalism nature', 'Universalism tolerance', 'Universalism objectivity']
+LABELS = ['Self-direction thought', 'Self-direction action', 'Stimulation', 'Hedonism', 'Achievement', 'Power dominance', 'Power resources', 'Face', 'Security personal', 'Security societal', 'Tradition',
+          'Conformity rules', 'Conformity interpersonal', 'Humility', 'Benevolence caring', 'Benevolence dependability', 'Universalism concern', 'Universalism nature', 'Universalism tolerance', 'Universalism objectivity']
 PROMPT_FORMATS = ["The premise: '{}' is '{}'. The conclusion is '{}'\n. Question: Which value category does the argument belong to? Options: {} \n",
                   "Premise: {}\nStance: {}\nConclusion: {}. Value category: {}\n Question: Which value category does the argument belong to?\n",
                   "Argument: {}. {}. {}. Value category: {}\n Question: Which value category does the argument belong to?\n"]
@@ -13,6 +14,7 @@ def label_to_vector(df):
     """Converts the labels to a vector"""
     label_names = df.iloc[:, 1:]
     return label_names.values.tolist()
+
 
 def convert_binary_labels_to_string(df):
     label_names = df.columns[1:]
@@ -27,29 +29,33 @@ def convert_binary_labels_to_string(df):
         labels.append(string_labels[:-2])
     return labels
 
+
 def single_shot_prompt(df):
     """Creates a single shot prompt for each argument with the first prompt format"""
-    
-    template = PROMPT_FORMATS[0] # use the first template 
+
+    template = PROMPT_FORMATS[0]  # use the first template
     prompts = [
-                template.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS))
-                for _, row in df.iterrows()
+        template.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS))
+        for _, row in df.iterrows()
     ]
     df['single_shot_prompt'] = prompts
     return df
+
 
 def few_shot_prompt(df, num_shots=1, prompt_format=0, random_seed=46):
     """Creates a few shot prompt for each argument"""
 
     prompt_format = PROMPT_FORMATS[prompt_format]
-    
+
     selected_arguments = df.sample(n=num_shots, random_state=random_seed)
     few_shot_prompts = [
         # prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: {random.choice(LABELS)}\n"
-        prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: {', '.join(random.sample(LABELS, 2))}\n"
+        prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(
+            LABELS)) + f"Answer: {', '.join(random.sample(LABELS, 2))}\n"
         for _, row in selected_arguments.iterrows()
     ]
-    df['few_shot_prompt'] = df.apply(lambda row: ''.join(few_shot_prompts) + prompt_format.format(row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: \n", axis=1)
+    df['few_shot_prompt'] = df.apply(lambda row: ''.join(few_shot_prompts) + prompt_format.format(
+        row['Premise'], row['Stance'], row['Conclusion'], ', '.join(LABELS)) + f"Answer: \n", axis=1)
     return df
 
 
@@ -68,8 +74,7 @@ def main():
         'LM.csv',
         'noise.csv',
         'thesaurus.csv'
-        ]
-
+    ]
 
     arguments_files = [
         'arguments-training.tsv',
@@ -141,8 +146,9 @@ def main():
     dataset_dict["augmented_noise"] = Dataset.from_pandas(out[5])
     dataset_dict["augmented_thesaurus"] = Dataset.from_pandas(out[6])
 
-    dataset_dict.save_to_disk(os.path.join(export_path, 'touche23_prompt'))
-    print(f"Dataset succesfully saved to {export_path} as touche23_prompt")
-    
+    dataset_dict.save_to_disk(os.path.join(export_path, 'touche23_prompt_aug'))
+    print(f"Dataset succesfully saved to {export_path} as touche23_prompt_aug")
+
+
 if __name__ == '__main__':
     main()

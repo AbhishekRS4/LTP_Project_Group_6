@@ -4,11 +4,11 @@ from transformers import DataCollatorForSeq2Seq, T5Tokenizer, AutoTokenizer
 from datasets import load_dataset, load_from_disk
 
 
-class Touche23DataModule(LightningDataModule):
+class ChangeMyViewDataModule(LightningDataModule):
     def __init__(
         self,
         dataset_path: str = None,
-        model_checkpoint: str = 'google/flan-t5-small',
+        model_checkpoint: str = "google/flan-t5-small",
         max_source_length: int = 512,
         train_batch_size: int = 16,
         eval_batch_size: int = 64,
@@ -29,8 +29,6 @@ class Touche23DataModule(LightningDataModule):
         self.data_collator = DataCollatorForSeq2Seq(
             tokenizer, padding=True, label_pad_token_id=-100)
 
-        self.save_hyperparameters(ignore=['dataset_path'])
-
         self.datasets = self._load_dataset()
 
     def _load_dataset(self) -> dict:
@@ -44,41 +42,20 @@ class Touche23DataModule(LightningDataModule):
         return tokenizer
 
     def report(self):
-        print('Training data:')
-        print(self.datasets['train'])
-        print('Validation data:')
-        print(self.datasets['validation'])
-        print('Testing data:')
-        print(self.datasets['test'])
-
-    def train_dataloader(self) -> DataLoader:
-        return DataLoader(
-            self.datasets['train'],
-            shuffle=True,
-            batch_size=self.train_batch_size,
-            collate_fn=self.data_collator,
-            num_workers=self.num_workers,
-        )
-
-    def val_dataloader(self) -> DataLoader:
-        return DataLoader(
-            self.datasets['validation'],
-            batch_size=self.eval_batch_size,
-            collate_fn=self.data_collator,
-            num_workers=self.num_workers,
-        )
+        print("Testing data:")
+        print(self.datasets["test"])
 
     def test_dataloader(self) -> DataLoader:
         return DataLoader(
-            self.datasets['test'],
+            self.datasets["test"],
             batch_size=self.eval_batch_size,
             collate_fn=self.data_collator,
             num_workers=self.num_workers,
         )
 
 
-if __name__ == '__main__':
-    data_module = Touche23DataModule('datasets/touche23/dummy-tokenized')
-    train = data_module.train_dataloader()
+if __name__ == "__main__":
+    data_module = ChangeMyViewDataModule("author_datasets/arguments_Amablue")
+    test = data_module.test_dataloader()
     # Prints the first batch of the training set
-    print(next(iter(train)))
+    print(next(iter(test)))

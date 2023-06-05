@@ -1,12 +1,12 @@
 import numpy as np
-from evaluate import convert_pred_string_labels_to_int_labels
+from utils import convert_pred_string_labels_to_int_labels
 from pytorch_lightning import LightningModule
 from torch.optim import AdamW
 import torch
 from torchmetrics.classification import (MultilabelF1Score,
                                          MultilabelPrecision, MultilabelRecall)
 from transformers import (GenerationConfig, T5ForConditionalGeneration,
-                          T5Tokenizer, LongT5ForConditionalGeneration)
+                          T5Tokenizer, LongT5ForConditionalGeneration, AutoTokenizer)
 from data_module import Touche23DataModule
 import pandas as pd
 
@@ -18,7 +18,7 @@ class LightningT5(LightningModule):
         num_classes: int = 20,
         gt_string_labels: list = [],
         learning_rate: float = 1e-4,
-        long_T5: bool = False,
+        long_T5: int = 0,
         **kwargs,
     ):
         super().__init__()
@@ -29,12 +29,11 @@ class LightningT5(LightningModule):
         self.long_T5 = long_T5
 
         # Load model, generation config, and tokenizer
-        self.model = self._get_model()
         self.generation_config = GenerationConfig.from_pretrained(
             model_name_or_path)
         self.generation_config.max_new_tokens = 128
-        self.tokenizer: T5Tokenizer = T5Tokenizer.from_pretrained(
-            model_name_or_path)
+        self.tokenizer = self._get_tokenizer()
+        self.model = self._get_model()
 
         # Instanciate metrics
         self.f1_score = MultilabelF1Score(
@@ -59,6 +58,13 @@ class LightningT5(LightningModule):
             model = T5ForConditionalGeneration.from_pretrained(
                 self.model_name_or_path)
         return model
+
+    def _get_tokenizer(self):
+        if self.long_T5:
+            tokenizer = AutoTokenizer.from_pretrained(self.model_name_or_path)
+        else:
+            tokenizer = T5Tokenizer.from_pretrained(self.model_name_or_path)
+        return tokenizer
 
     def forward(self, **inputs):
         return self.model(
@@ -132,6 +138,54 @@ class LightningT5(LightningModule):
 
         return {'val_loss': val_loss,
                 'input_text': input_text,
+                'generated_text': generated_text, }
+
+    def test_step(self, batch, batch_idx, dataloader_idx=0):
+        # Generate outputs given a batch
+        generated_out = self.model.generate(
+            inputs=batch['input_ids'],
+            generation_config=self.generation_config)
+
+        # Convert the input, generated, and reference tokens to text
+        input_text = self.tokenizer.batch_decode(
+            batch['input_ids'], skip_special_tokens=True)
+        generated_text = self.tokenizer.batch_decode(
+            generated_out, skip_special_tokens=True)
+        # reference_texts = self.tokenizer.batch_decode(
+        #     batch['labels'], skip_special_tokens=True)
+
+        # And compute metrics to log
+        pred_int_labels = convert_pred_string_labels_to_int_labels(
+            generated_text,
+            self.gt_string_labels,
+            delimiter=','
+        )
+        pred_int_labels = torch.from_numpy(pred_int_labels)
+        pred_int_labels = pred_int_labels.to(device=self.device.type)
+        target_int_labels = batch['int_vec_labels']
+
+        # use for debug purposes
+        # print(target_int_labels)
+        # print(generated_text, pred_int_labels)
+
+        self.f1_score.update(pred_int_labels, target_int_labels)
+        self.precision_score.update(pred_int_labels, target_int_labels)
+        self.recall_score.update(pred_int_labels, target_int_labels)
+
+        # Also pass input to the model to compute loss
+        # outputs = self.model(
+        #     input_ids=batch['input_ids'],
+        #     attention_mask=batch['attention_mask'],
+        #     labels=batch['labels'])
+
+        # val_loss = outputs.loss
+
+        self.log_dict({'test/f1': self.f1_score,
+                       'test/precision': self.precision_score,
+                       'test/recall': self.recall_score, },
+                      prog_bar=True)
+
+        return {'input_text': input_text,
                 'generated_text': generated_text, }
 
     def configure_optimizers(self):

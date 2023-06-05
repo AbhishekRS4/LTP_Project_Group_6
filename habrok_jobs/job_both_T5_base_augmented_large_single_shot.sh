@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=7:00:00
+#SBATCH --time=24:00:00
 #SBATCH --partition=gpumedium
 #SBATCH --gpus-per-node=a100:1
 #SBATCH --mem=64GB
@@ -23,20 +23,39 @@ cd $TMPDIR/LTP_Project_Group_6
 which python3
 python3 task_1/train_model.py \
 --model google/flan-t5-base \
---data_path datasets/touche23_few_shot_prompt \
---run_name T5_base \
+--data_path datasets/touche23_prompt_aug_large_single_shot_prompt \
+--run_name T5_base_augmented_large \
 --checkpoint_save_path /scratch/$USER/models/ \
 --learning_rate 1e-4 \
 --train_batch_size 32 \
 --eval_batch_size 32 \
---max_epochs 60 \
+--max_epochs 20 \
 --log_every_n_steps 20 \
 --val_check_interval 1.0 \
 --limit_val_batches 1.0 \
 --force_cpu 0 \
 --num_workers 1 \
---prompt_mode few_shot \
+--prompt_mode single_shot \
 --longT5_mode 0
+
+sleep 10
+
+python3 task_1/train_model.py \
+--model google/long-t5-local-base \
+--data_path datasets/touche23_prompt_aug_large_long_single_shot_prompt \
+--run_name longT5_base_augmented_large \
+--checkpoint_save_path /scratch/$USER/models/ \
+--learning_rate 1e-4 \
+--train_batch_size 32 \
+--eval_batch_size 32 \
+--max_epochs 20 \
+--log_every_n_steps 20 \
+--val_check_interval 1.0 \
+--limit_val_batches 1.0 \
+--force_cpu 0 \
+--num_workers 1 \
+--prompt_mode single_shot \
+--longT5_mode 1
 
 
 deactivate
