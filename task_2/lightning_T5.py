@@ -6,7 +6,7 @@ from transformers import (GenerationConfig, T5ForConditionalGeneration,
                           T5Tokenizer, LongT5ForConditionalGeneration, AutoTokenizer)
 
 
-
+from create_csv_data import CSVWriter
 from data_module import ChangeMyViewDataModule
 from utils import convert_pred_string_labels_to_int_labels
 
@@ -17,6 +17,7 @@ class LightningT5(LightningModule):
         num_classes: int = 20,
         gt_string_labels: list = [],
         long_T5: int = 0,
+        author_dataset: str = "arguments_Amablue_body",
         **kwargs,
     ):
         super().__init__()
@@ -32,6 +33,8 @@ class LightningT5(LightningModule):
         self.generation_config.max_new_tokens = 128
         self.tokenizer = self._get_tokenizer()
         self.dict_labels = {}
+        self.author_dataset = author_dataset
+        self.csv_writer = CSVWriter(self.author_dataset+".csv", ["body", "pred_int_labels"])
 
     def _get_model(self):
         if self.long_T5:
@@ -69,11 +72,21 @@ class LightningT5(LightningModule):
         generated_text = self.tokenizer.batch_decode(
             generated_out, skip_special_tokens=True)
 
+        #print(len(input_text))
+        #print(input_text[0])
+        #print(input_text[1])
+
         pred_int_labels = convert_pred_string_labels_to_int_labels(
             generated_text,
             self.gt_string_labels,
             delimiter=','
         )
+
+        for label_index in range(len(pred_int_labels)):
+            self.csv_writer.write_row([input_text[label_index], pred_int_labels[label_index]])
+        #print(len(pred_int_labels))
+        #print(pred_int_labels[0])
+        #print(pred_int_labels[1])
 
         pred_int_labels = np.sum(pred_int_labels, axis=0)
         for label_index in range(len(pred_int_labels)):
