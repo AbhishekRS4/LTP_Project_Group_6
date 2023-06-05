@@ -50,7 +50,7 @@ rsync -aP dataset_files.tar s0000000@login1.hb.hpc.rug.nl:/projects/s0000000/
 ssh s3416402@login1.hb.hpc.rug.nl
 
 ### Copy repo
-rsync -r LTP_Project_Group_6 s3416402@login1.hb.hpc.rug.nl:/home3/s3416402/
+rsync -r LTP_Project_Group_6 s3374610@login1.hb.hpc.rug.nl:/home3/s3374610/
 
 ### Interactive command line
 srun --partition=gpushort --gpus-per-node=a100:1 --mem=64GB --time=3:00:00 --job-name=test --pty /bin/bash
