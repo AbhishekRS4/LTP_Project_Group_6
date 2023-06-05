@@ -83,7 +83,7 @@ def get_author_comment_count(ARGS):
 
     # drop empty
     df_subreddits['author'].replace('', np.nan, inplace=True)
-    df_subreddits['subreddit'].replace('', np.nan, inplace=True)
+    df_subreddits['score'].replace('', 0, inplace=True)
     df_subreddits['body'].replace('', np.nan, inplace=True)
 
     # drop duplicates
@@ -106,7 +106,7 @@ def get_author_comment_count(ARGS):
         df_author = df_subreddits[df_subreddits.author == author]
         dataset_dict["test"] = Dataset.from_pandas(df_author)
         dataset_dict.save_to_disk(os.path.join(ARGS.dir_path_orig, f"arguments_{author}"))
-    print("Completed creating original datasets")
+    print("Completed creating original datasets\n")
 
     print("Creating preprocessed datasets..........")
     list_orig_datasets = sorted(os.listdir(ARGS.dir_path_orig))
@@ -121,10 +121,10 @@ def get_author_comment_count(ARGS):
     return
 
 def main():
-    file_csv = "subreddit_threads.csv"
-    dir_path_orig = "author_datasets_orig"
-    dir_path_preprocessed = "author_datasets_preprocessed"
-    top_k_authors = 20
+    file_csv = "subreddit_threads_prompt.csv"
+    dir_path_orig = "author_datasets_orig_prompt"
+    dir_path_preprocessed = "author_datasets_preprocessed_prompt"
+    top_k_authors = 30
     long_T5 = 0
 
     parser = argparse.ArgumentParser(
