@@ -54,12 +54,12 @@ def load_cmv_threads_data(ARGS):
     list_body = []
 
     csv_writer = CSVWriter("subreddit_threads.csv", list_keys_required)
+    author, subreddit, body = (None, None, None)
 
     with open(ARGS.file_json, encoding="UTF-8") as file_handler:
         # print(f"num lines: {sum(1 for _ in file_handler)}")
 
         for line_number, line in enumerate((file_handler)):
-            author, subreddit, body = (None, None, None)
             line_as_file = io.StringIO(line)
             json_parser = ijson.parse(line_as_file)
             for prefix, type, value in json_parser:
