@@ -37,8 +37,8 @@ def test(ARGS):
 
 def main():
     model = "google/flan-t5-base"
-    dataset_path = "author_datasets_preprocessed/arguments_DeltaBot_body/"
-    file_path_model = "/home/abhishek/Desktop/RUG/lang_tech_project/model_checkpoints/model.ckpt"
+    dataset_path = "author_datasets_preprocessed_prompt/arguments_Amablue_body/"
+    file_path_model = "/home/abhishek/Desktop/RUG/lang_tech_project/model_checkpoints/f1=0.76-v2.ckpt"
     file_labels_tsv = "../task_1/dataset/labels-training.tsv"
 
     parser = argparse.ArgumentParser(description="Training parameters")

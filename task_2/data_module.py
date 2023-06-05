@@ -55,7 +55,8 @@ class ChangeMyViewDataModule(LightningDataModule):
 
 
 if __name__ == "__main__":
-    data_module = ChangeMyViewDataModule("author_datasets/arguments_Amablue")
+    data_module = ChangeMyViewDataModule("author_datasets_preprocessed_prompt/arguments_Amablue_body/")
     test = data_module.test_dataloader()
+    print(len(test))
     # Prints the first batch of the training set
     print(next(iter(test)))
