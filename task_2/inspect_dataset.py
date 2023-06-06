@@ -9,6 +9,8 @@ def main():
     print(dataset['test'][1])
     print(dataset['test'][2])
     print(dataset['test'][3])
+    print(list(dataset['test'][:].values())[1])
+    print(list(dataset['test'][:].values())[2])
     return
 
 main()
