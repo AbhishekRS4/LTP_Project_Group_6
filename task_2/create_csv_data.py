@@ -48,14 +48,11 @@ class CSVWriter:
 
 
 def load_cmv_threads_data(ARGS):
-    list_keys_required = ["author", "score", "body",]
+    list_keys_required = ["author", "score", "delta", "body",]
     num_keys = len(list_keys_required)
-    list_author = []
-    list_subreddit = []
-    list_body = []
 
     csv_writer = CSVWriter("subreddit_threads.csv", list_keys_required)
-    author, body, score = (None, None, None)
+    author, body, score, delta = (None, None, None, None)
     counter = 0
 
     with open(ARGS.file_json, encoding="UTF-8") as file_handler:
@@ -70,7 +67,7 @@ def load_cmv_threads_data(ARGS):
             #print("="*100)
             for prefix, type, value in json_parser:
                 #print("prefix:", prefix , "type:", type, "value:", value)
-                if prefix == f"comments.item.{list_keys_required[2]}":
+                if prefix == f"comments.item.{list_keys_required[3]}":
                     body = value
                     #print(f"{counter} body: {body}")
                     counter += 1
@@ -78,6 +75,10 @@ def load_cmv_threads_data(ARGS):
                     score = value
                     #print(f"{counter} score: {score}")
                     counter += 1
+                elif prefix == "delta":
+                    delta = value
+                    counter += 1
+                    #print(f"{counter} delta: {delta}")
                 elif prefix == f"comments.item.{list_keys_required[0]}":
                     author = value
                     #print(f"{counter} author: {author}")
@@ -87,7 +88,12 @@ def load_cmv_threads_data(ARGS):
 
                 if (counter % num_keys) == 0:
                     if (author != "[deleted]") and (score != "[deleted]") and (body != "[deleted]"):
-                        csv_writer.write_row([author, score, body])
+                        csv_writer.write_row([author, score, delta, body])
+
+            """
+            if line_number == 2:
+                break
+            """
 
     return
 
