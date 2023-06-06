@@ -1,14 +1,15 @@
 import numpy as np
-from utils import convert_pred_string_labels_to_int_labels
+import pandas as pd
+import torch
+from data_module import Touche23DataModule
 from pytorch_lightning import LightningModule
 from torch.optim import AdamW
-import torch
-from torchmetrics.classification import (MultilabelF1Score,
+from torchmetrics.classification import (MultilabelAccuracy, MultilabelF1Score,
                                          MultilabelPrecision, MultilabelRecall)
-from transformers import (GenerationConfig, T5ForConditionalGeneration,
-                          T5Tokenizer, LongT5ForConditionalGeneration, AutoTokenizer)
-from data_module import Touche23DataModule
-import pandas as pd
+from transformers import (AutoTokenizer, GenerationConfig,
+                          LongT5ForConditionalGeneration,
+                          T5ForConditionalGeneration, T5Tokenizer)
+from utils import convert_pred_string_labels_to_int_labels
 
 
 class LightningT5(LightningModule):
@@ -45,6 +46,10 @@ class LightningT5(LightningModule):
         self.recall_score = MultilabelRecall(
             num_labels=self.num_classes,
             average='macro',)
+        self.accuracy_score = MultilabelAccuracy(
+            num_labels=self.num_classes,
+            average='macro'
+        )
         # List to keep track of training loss
         self.train_loss_history = []
 
@@ -171,6 +176,7 @@ class LightningT5(LightningModule):
         self.f1_score.update(pred_int_labels, target_int_labels)
         self.precision_score.update(pred_int_labels, target_int_labels)
         self.recall_score.update(pred_int_labels, target_int_labels)
+        self.accuracy_score.update(pred_int_labels, target_int_labels)
 
         # Also pass input to the model to compute loss
         # outputs = self.model(
@@ -182,7 +188,8 @@ class LightningT5(LightningModule):
 
         self.log_dict({'test/f1': self.f1_score,
                        'test/precision': self.precision_score,
-                       'test/recall': self.recall_score, },
+                       'test/recall': self.recall_score,
+                       'test/accuracy': self.accuracy_score},
                       prog_bar=True)
 
         return {'input_text': input_text,

@@ -19,7 +19,7 @@ def get_test_args():
     file_path_model = "artifacts/T5_base_few_shot_0604-15:26:47/f1=0.79.ckpt"
     # file_path_model = "artifacts/T5_base_single_shot_0604-12:44:31/model.ckpt"
     file_labels_tsv = "task_1/dataset/labels-training.tsv"
-    force_cpu = 1
+    force_cpu = 0
     limit_test_batches = 1.0
     eval_batch_size = 32
 
@@ -36,7 +36,7 @@ def get_test_args():
                         help="Full path to trained model file")
     parser.add_argument("--num_classes", type=int, default=20,
                         help="The number of output classes.")
-    parser.add_argument("--num_workers", type=int, default=1,
+    parser.add_argument("--num_workers", type=int, default=8,
                         help="Number of workers to use for data loading")
     parser.add_argument("--eval_batch_size", type=int, default=eval_batch_size,
                         help="batch size to use for testing")
@@ -52,6 +52,9 @@ def get_test_args():
 
 def test():
     test_args = get_test_args()
+    print(test_args)
+
+    test_args.file_path_model = os.path.expanduser(test_args.file_path_model)
     # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
     accelerator = "cpu" if test_args.force_cpu else "auto"
 

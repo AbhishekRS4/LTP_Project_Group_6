@@ -52,6 +52,10 @@ ssh s3416402@login1.hb.hpc.rug.nl
 ### Copy repo
 rsync -r LTP_Project_Group_6 s3374610@login1.hb.hpc.rug.nl:/home3/s3374610/
 
+rsync -r artifacts/T5_large_augmented_single_shot_0603-22:29:41 s3416402@login1.hb.hpc.rug.nl:/home3/s3416402/LTP_Project_Group_6/artifacts
+
+rsync -r test_T5_large.sh s3416402@login1.hb.hpc.rug.nl:/home3/s3416402/LTP_Project_Group_6
+
 rsync -r s3416402@login1.hb.hpc.rug.nl:/scratch/s3416402/models/test_lower_loss artifacts/
 
 rsync -r s3416402@login1.hb.hpc.rug.nl:/scratch/s3416402/models/0604-15:26:47-touche23-epoch=49-val/f1=0.79.ckpt artifacts/T5_base_few_shot_0604-15:26:47
